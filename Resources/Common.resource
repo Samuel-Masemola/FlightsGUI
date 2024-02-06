@@ -1,44 +1,39 @@
 *** Settings ***
-Documentation                                       FindFlight keyword class
+Documentation                                       Common keywords file
 Library                                             RPA.Windows
 Library                                             RPA.Desktop
-Library                                             DataDriver    ..\\resources\\SampleAppData.xlsx    sheet_name=nput
+Library                                             Selenium
 Library                                             ExcelLibrary
 
-
-
 *** Variables ***
-#${old_wait_time}=  Set Wait Time  5.0
 #Login screen elements
 ${path}                                            C:\\Users\\a232985\\Downloads\\Flights Application 3\\Flights Application\\FlightsGUI.exe
 ${txt_username}                                    id:agentName
-${txt_password}                                    id:password
+${txt_password}                                    automationid:password
 ${btn_signin}                                      id:okButton
 ${screen_login}                                    class:NavigationWindow
-
-
-
-#Book flight elements
-${combo_frmCTY}                                    id:fromCity
-${combo_toCTY}                                     id:toCity
-${txt_date}                                        id:PART_TextBox
-${combo_class}                                     id:Class
-${combo_numOfTickets}                              id:numOfTickets
-${btn_find}                                        class:Button
-${btn_find2}                                       name:"FIND FLIGHTS"
-
+${popup_error_msg}                                 id:65535
+${popup_ok_btn}                                    id:2
 
 
 *** Keywords ***
+#Needs more work. Failing to find element
+Login button should be disabled
+    ${btn_signin}=   Get Attribute  type:button name:IsEnabled   AutomationId
+    IF    ${is_element_enabled} == True
+        Click    ${btn_sigin}
+    ELSE
+        Screenshot    ${btn_signin}    results\login.png
+
 User has successfully logged into flights service app
+    log to console  ---------------------------Default Setup---------------------------------------------
     ${old_wait_time}=  Set Wait Time  2.5
     Windows Run    ${path}
     Control window    Micro Focus MyFlight Sample Application
     ${username}    Read Excel    ${CURDIR}${/}..\\Resources\\SampleAppData.xlsx    nput    2    10
-    Log To Console    ${username}
     Send Keys         ${txt_username}    ${username}
     ${password}    Read Excel    ${CURDIR}${/}..\\Resources\\SampleAppData.xlsx    nput    2    11
-    Log To Console    ${password}
+    Log To Console    ${username}    ${password}
     Send Keys         ${txt_password}    ${password}
     Take Screenshot    ${CURDIR}${/}..\\results\\LoginSuccess.png
     RPA.Windows.Click    ${btn_signin}
@@ -52,21 +47,24 @@ Read Excel
     [Return]                ${data}
     Close Current Excel Document
 
-searches for relevant flight
-    #Sleep    5
-    #Wait For Element    ${combo_frmCTY}    5
+User input wrong credentials
+    log to console  ---------------------------Invalid credentials---------------------------------------------
+    ${old_wait_time}=  Set Wait Time  2.5
+    Windows Run    ${path}
     Control window    Micro Focus MyFlight Sample Application
-    Select     ${combo_frmCTY}     Paris
-    Select     ${combo_toCTY}      Seattle
-    Select     ${combo_class}      Economy
-    Select     ${combo_numOfTickets}    3
-    Send Keys  ${txt_date}         2115/06/01
-    Log To Console    ${combo_frmCTY}
-    Take Screenshot    ${CURDIR}${/}..\\results\\SearchFlight.png
-    RPA.Windows.Click      ${btn_find2}
-
-Available flights are displayed
-    Take Screenshot    ${CURDIR}${/}..\\results\\SearchFlight.png
+    ${username}    Read Excel    ${CURDIR}${/}..\\Resources\\SampleAppData.xlsx    nput    4    10
+    Log To Console    ${username}
+    Send Keys         ${txt_username}    ${username}
+    ${password}    Read Excel    ${CURDIR}${/}..\\Resources\\SampleAppData.xlsx    nput    4    11
+    Log To Console    ${password}
+    Send Keys         ${txt_password}    ${password}
+    #Take Screenshot    ${CURDIR}${/}..\\results\\LoginFailed.png
+    RPA.Windows.Click    ${btn_signin}
+    #${error_msg}= desktop.read_text(${popup_error_msg})
+    ${date} =  Get Text    ${popup_error_msg}
+    Log To Console    ${date}
+    Take Screenshot    ${CURDIR}${/}..\\results\\LoginFailed.png
+    RPA.Windows.Click    ${popup_ok_btn}
 
 
 Default Teardown

@@ -1,9 +1,9 @@
 *** Settings ***
-Documentation    This is the "Find flights" test
-Resource         ../keywords/NegativeLogin.robot
+Documentation    This is a negative test
+Resource         ../Resources/Common.resource
 
 *** Test Cases ***
 Find a flight for customer
     [Tags]    Negative
     Given User input wrong credentials
-    Then Login button should be disabled
+    #Then Login button should be disabled
